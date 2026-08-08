@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="Riverside.SubmissionIntegrity.App/Riverside.SubmissionIntegrity.App.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Riverside.SubmissionIntegrity.App/Riverside.SubmissionIntegrity.App.csproj" />
+    <Project Path="src/Riverside.SubmissionIntegrity.Core/Riverside.SubmissionIntegrity.Core.csproj" Id="8fbb88af-fc66-47d0-b146-2467d52f10e2" />
+  </Folder>
 </Solution>
