@@ -1,7 +1,108 @@
 @page "/"
+@inject ReviewViewModel ViewModel
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Project Review Dashboard</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="container" style="padding: 1rem;">
+    <FluentGrid Spacing="3">
+        <!-- Reviewer Details Section -->
+        <FluentGridItem xs="12" sm="6">
+            <FluentCard>
+                <h3>Scraping / Testing Setup</h3>
+                <FluentTextField Label="Project Name" @bind-Value="ViewModel.Submission.ProjectName" style="width: 100%;" />
+                <FluentTextField Label="Demo URL" @bind-Value="ViewModel.Submission.DemoUrl" style="width: 100%;" />
+                <FluentTextField Label="Repository URL" @bind-Value="ViewModel.Submission.RepositoryUrl" style="width: 100%;" />
+                <FluentTextField Label="Hackatime Project Names" @bind-Value="ViewModel.Submission.HackatimeProjectNames" style="width: 100%;" />
+                <FluentNumberField Label="Hours Claimed" @bind-Value="ViewModel.Submission.HoursSpent" style="width: 100%;" />
+                <FluentButton Appearance="Appearance.Accent" OnClick="() => ViewModel.AnalyzeSubmissionAsync()" style="margin-top: 1rem;">
+                    Analyze Project
+                </FluentButton>
+            </FluentCard>
+        </FluentGridItem>
 
-Welcome to your new app.
+        <!-- Testing Extractor Summary -->
+        <FluentGridItem xs="12" sm="6">
+            <FluentCard>
+                <h3>Extraction Summary</h3>
+                @if (ViewModel.HasExtractionError)
+                {
+                    <FluentMessageBar Intent="MessageIntent.Error">
+                        @ViewModel.TestingExtractionSummary
+                    </FluentMessageBar>
+                }
+                else if (!string.IsNullOrEmpty(ViewModel.TestingExtractionSummary))
+                {
+                    <FluentTextArea ReadOnly="true" Value="@ViewModel.TestingExtractionSummary" Rows="5" style="width: 100%;" />
+                }
+                else
+                {
+                    <p>Provide URLs and analyze to get testing summary.</p>
+                }
+            </FluentCard>
+        </FluentGridItem>
+
+        <!-- Analysis Results -->
+        @if (ViewModel.GithubStats != null || ViewModel.HackatimeStats != null)
+        {
+            <FluentGridItem xs="12">
+                <FluentDivider />
+            </FluentGridItem>
+
+            <FluentGridItem xs="12">
+                <h3>Analysis Results</h3>
+            </FluentGridItem>
+
+            <FluentGridItem xs="12" sm="6">
+                <FluentCard>
+                    <h4>GitHub Stats</h4>
+                    <p><b>Public:</b> @ViewModel.GithubStats?.IsPublic</p>
+                    <p><b>OSS License:</b> @ViewModel.GithubStats?.HasOssLicense</p>
+                    <h5>Recent Commits:</h5>
+                    <ul>
+                        @if (ViewModel.GithubStats?.RecentCommits != null)
+                        {
+                            @foreach (var commit in ViewModel.GithubStats.RecentCommits)
+                            {
+                                <li>[@commit.Date.ToShortDateString()] @commit.Message (+@commit.Additions / -@commit.Deletions)</li>
+                            }
+                        }
+                    </ul>
+                </FluentCard>
+            </FluentGridItem>
+
+            <FluentGridItem xs="12" sm="6">
+                <FluentCard>
+                    <h4>Hackatime Stats</h4>
+                    <p><b>Total Hours Logged:</b> @ViewModel.HackatimeStats?.TotalHoursLogged</p>
+                    <p><b>Estimated AI Usage:</b> @ViewModel.HackatimeStats?.EstimatedAiUsagePercentage%</p>
+                    <p><b>Editors:</b> @(ViewModel.HackatimeStats?.EditorsUsed != null ? string.Join(", ", ViewModel.HackatimeStats.EditorsUsed) : "")</p>
+                    <p><b>Platforms:</b> @(ViewModel.HackatimeStats?.OsPlatformsUsed != null ? string.Join(", ", ViewModel.HackatimeStats.OsPlatformsUsed) : "")</p>
+                </FluentCard>
+            </FluentGridItem>
+
+            <FluentGridItem xs="12">
+                <FluentCard>
+                    <h4>Ship Justification Generator</h4>
+
+                    <FluentCheckbox @bind-Value="CommitsFeelAppropriate" Label="Commits and hours feel appropriate to the scope" />
+
+                    <FluentButton Appearance="Appearance.Neutral" OnClick="() => ViewModel.GenerateShipJustification(CommitsFeelAppropriate)" style="margin-top: 1rem;">
+                        Generate Draft
+                    </FluentButton>
+
+                    @if (!string.IsNullOrEmpty(ViewModel.FinalRecommendation))
+                    {
+                        <div style="margin-top: 1rem;">
+                            <h5>Recommendation: <strong>@ViewModel.FinalRecommendation</strong></h5>
+                            <FluentTextArea ReadOnly="true" Value="@ViewModel.ShipJustificationDraft" Rows="3" style="width: 100%;" />
+                        </div>
+                    }
+                </FluentCard>
+            </FluentGridItem>
+        }
+    </FluentGrid>
+</div>
+
+@code {
+    private bool CommitsFeelAppropriate { get; set; } = true;
+}

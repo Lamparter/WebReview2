@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.FluentUI.AspNetCore.Components;
+using Riverside.SubmissionIntegrity.Core;
 
 namespace Riverside.SubmissionIntegrity.App;
 
@@ -12,6 +14,8 @@ public class Program
 		builder.RootComponents.Add<HeadOutlet>("head::after");
 
 		builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+		builder.Services.AddFluentUIComponents();
+		builder.Services.AddSubmissionIntegrityCore();
 
 		await builder.Build().RunAsync();
 	}
